@@ -1,7 +1,7 @@
 //ServiceWorkerGlobalScope.self
 self.importScripts('js/data.js');
 
-const version = 'v4';
+const version = 'v1';
 const appShellList = [
     '/pwa-demo/',
     '/pwa-demo/index.html',
@@ -13,12 +13,12 @@ const appShellList = [
 let cacheList = imageData.concat(appShellList);
 
 //install
-self.addEventListener('install', (e)=>{
+self.addEventListener('install', (e) => {
     console.log('Service Worker installing...');
     //hold the service worker until tasks complete
     e.waitUntil(
         //caches is a CacheStorage object of ServiceWorkerGlobalScope
-        caches.open(version).then((cache)=>{
+        caches.open(version).then((cache) => {
             return cache.addAll(cacheList);
         })
     );
@@ -27,26 +27,39 @@ self.addEventListener('install', (e)=>{
 
 //fetch
 self.addEventListener('fetch', (e) => {
-    console.log(e.request.url);
+    console.log('Service Worker fetching...');
+    //intercept request and return custom respond
     e.respondWith(
-        caches.match(e.request).then((response)=>{
-            return response || fetch(e.request);
-        })
+        (async () => {
+            let response = await caches.match(e.request);
+            return response || (async () => {
+                //if no match then fetch and cache
+                let response = await fetch(e.request);
+                let cache = await caches.open(version);
+                await cache.put(e.request, response.clone());
+                console.log(`Service Worker cached missing resource: ${e.request.url}`);
+                return response;
+            })();
+        })()
     );
 });
 
 //activate
 self.addEventListener('activate', (e) => {
-    console.log('Service Worker activate event.');
+    console.log('Service Worker activate triggered.');
     e.waitUntil(
-        caches.keys().then(function (keyList) {
+        (async () => {
+            let keyList = await caches.keys();
             return Promise.all(
-                keyList.map(function (key) {
+                keyList.map(async (key) => {
                     if (version !== key) {
-                        return caches.delete(key);
+                        //delete other version
+                        let result = await caches.delete(key);
+                        console.log('Service Worker deleted cache: ' + key);
+                        return result;
                     }
                 })
-            );
-        })
+            )
+        })()
     )
 });
