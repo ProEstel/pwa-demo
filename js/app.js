@@ -17,7 +17,7 @@ document.querySelector('#unregister').addEventListener('click', async () => {
     console.log('Unregistering all service worker...');
     registrations.forEach((reg) => {
         reg.unregister();
-    })
+    });
 });
 
 //clear all caches
