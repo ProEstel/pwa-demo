@@ -28,3 +28,13 @@ document.querySelector('#clear').addEventListener('click', async () => {
         caches.delete(key);
     });
 });
+
+//generate notification
+document.querySelector('#notification').addEventListener('click', async () => {
+    let result = await Notification.requestPermission();
+    if (result === 'granted') {
+        new Notification('Notification Demo', {
+            body: 'Hello, World!'
+        });
+    }
+});
