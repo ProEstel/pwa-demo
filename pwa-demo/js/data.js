@@ -16,3 +16,5 @@ const imageData = [
     '/pwa-demo/images/archlinux/archlinux-tribute.jpg',
     '/pwa-demo/images/archlinux/archlinux-underground.jpg'
 ];
+
+const syncTag = 'testSync';

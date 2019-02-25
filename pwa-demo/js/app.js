@@ -16,7 +16,10 @@ document.querySelector('#register').addEventListener('click', async () => {
         let publicKey = await res.text();
         console.log('Public Key: ' + publicKey);
         //subscribe to push service
-        let subscription = await registration.pushManager.subscribe({userVisibleOnly: true,applicationServerKey:urlBase64ToUint8Array(publicKey)});
+        let subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(publicKey)
+        });
         console.log(subscription.toJSON());
     } catch (e) {
         console.warn(e.message);
@@ -71,6 +74,20 @@ document.querySelector('#push').addEventListener('click', async () => {
         console.warn(e.message);
     }
 });
+
+//trigger sync: chrome only
+document.querySelector('#sync').addEventListener('click', triggerSync);
+
+window.addEventListener('beforeunload', triggerSync);
+
+async function triggerSync() {
+    try {
+        let registration = await navigator.serviceWorker.ready;
+        registration.sync.register(syncTag);
+    } catch (e) {
+        console.warn(e.message);
+    }
+}
 
 //from Mozilla's serviceworker-cookbook https://github.com/mozilla/serviceworker-cookbook.git
 function urlBase64ToUint8Array(base64String) {

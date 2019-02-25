@@ -47,6 +47,7 @@ public class SubscribeController {
 //			pushService.setPrivateKey(Utils.loadPrivateKey("V6pWDEb6vldP8TvSo25G2uco2A9AbP92-MakZdvbnFk="));
 			pushService.setPublicKey(Utils.loadPublicKey(this.publicKey));
 			pushService.setPrivateKey(Utils.loadPrivateKey(this.privateKey));
+			//Thread.sleep(5000);
 			HttpResponse httpResponse = pushService.send(notification);
 
 			int statusCode = httpResponse.getStatusLine().getStatusCode();
@@ -58,6 +59,18 @@ public class SubscribeController {
 			e.printStackTrace();
 		}
 		return "Push Failed";
+	}
+
+	@RequestMapping("/sync")
+	@ResponseBody
+	public String sync(){
+		System.out.println("Sync Triggered.");
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return "Sync From Server";
 	}
 
 	private void generateKeys(){

@@ -73,3 +73,21 @@ self.addEventListener('push', (e) => {
         })
     );
 });
+
+//sync
+self.addEventListener('sync', (e) => {
+    console.log(e.tag);
+    if (e.tag === syncTag) {
+        e.waitUntil(
+            (async () => {
+                let res = await fetch('/push-server/sync');
+                let data = await res.text();
+                self.registration.showNotification('Sync Demo', {
+                    body: data,
+                });
+            })()
+        );
+    } else {
+        console.log('Sync tag does not match, skipped.');
+    }
+});
