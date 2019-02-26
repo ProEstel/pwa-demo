@@ -109,6 +109,12 @@ let observer = new IntersectionObserver((entries, observer)=>{
 imgNodes.forEach((img) => {
     observer.observe(img);
 });
+function loadImages(img) {
+    img.setAttribute('src', img.getAttribute('tmp'));
+    img.onload = () => {
+        img.removeAttribute('tmp');
+    };
+}
 
 async function triggerSync() {
     try {
@@ -119,14 +125,7 @@ async function triggerSync() {
     }
 }
 
-function loadImages(img) {
-    img.setAttribute('src', img.getAttribute('tmp'));
-    img.onload = () => {
-        img.removeAttribute('tmp');
-    };
-}
-
-//from Mozilla's serviceworker-cookbook https://github.com/mozilla/serviceworker-cookbook.git
+//from Mozilla's serviceworker-cookbook https://github.com/mozilla/serviceworker-cookbook
 function urlBase64ToUint8Array(base64String) {
     var padding = '='.repeat((4 - base64String.length % 4) % 4);
     var base64 = (base64String + padding)
