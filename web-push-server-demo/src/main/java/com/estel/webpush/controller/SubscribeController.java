@@ -65,11 +65,6 @@ public class SubscribeController {
 	@ResponseBody
 	public String sync(){
 		System.out.println("Sync Triggered.");
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		return "Sync From Server";
 	}
 

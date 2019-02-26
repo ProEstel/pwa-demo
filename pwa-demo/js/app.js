@@ -7,23 +7,8 @@ document.querySelector('#content').innerHTML = content;
 
 //register a service worker
 document.querySelector('#register').addEventListener('click', async () => {
-    try {
-        navigator.serviceWorker.register('/pwa-demo/sw.js');
-        let registration = await navigator.serviceWorker.ready;
-        console.log('Service Worker registered.');
-        //get public key
-        let res = await fetch('/push-server/getKey');
-        let publicKey = await res.text();
-        console.log('Public Key: ' + publicKey);
-        //subscribe to push service
-        let subscription = await registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(publicKey)
-        });
-        console.log(subscription.toJSON());
-    } catch (e) {
-        console.warn(e.message);
-    }
+    await navigator.serviceWorker.register('/pwa-demo/sw.js');
+    console.log('Service Worker registered.');
 });
 
 //unregister all
@@ -55,7 +40,26 @@ document.querySelector('#notification').addEventListener('click', async () => {
     }
 });
 
-//generate notification
+//subscribe to mozilla autopush
+document.querySelector('#subscribe').addEventListener('click', async () => {
+    try {
+        let registration = await navigator.serviceWorker.ready;
+        //get public key
+        let res = await fetch('/push-server/getKey');
+        let publicKey = await res.text();
+        console.log('Public Key: ' + publicKey);
+        //subscribe to push service
+        let subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(publicKey)
+        });
+        console.log(subscription.toJSON());
+    } catch (e) {
+        console.warn(e.message);
+    }
+});
+
+//trigger push
 document.querySelector('#push').addEventListener('click', async () => {
     try {
         let registration = await navigator.serviceWorker.ready;
@@ -70,6 +74,18 @@ document.querySelector('#push').addEventListener('click', async () => {
         });
         let data = await res.text();
         console.log(data);
+    } catch (e) {
+        console.warn(e.message);
+    }
+});
+
+//unsubscribe
+document.querySelector('#unsubscribe').addEventListener('click', async () => {
+    try {
+        let registration = await navigator.serviceWorker.ready;
+        let subscription = await registration.pushManager.getSubscription();
+        await subscription.unsubscribe();
+        console.log('Unsubscribed.');
     } catch (e) {
         console.warn(e.message);
     }
