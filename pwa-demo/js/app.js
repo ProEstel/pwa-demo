@@ -1,7 +1,7 @@
 //generate content template
 let content = '';
-imageData.forEach((name) => {
-    content += `<img src="/pwa-demo/images/placeholder.jpg" tmp="${name}"/>`;
+imageData.forEach((path) => {
+    content += `<img src="/pwa-demo/images/placeholder.jpg" tmp="${path}"/>`;
 });
 document.querySelector('#content').innerHTML = content;
 
@@ -46,12 +46,11 @@ document.querySelector('#subscribe').addEventListener('click', async () => {
         let registration = await navigator.serviceWorker.ready;
         //get public key
         let res = await fetch('/push-server/getKey');
-        let publicKey = await res.text();
-        console.log('Public Key: ' + publicKey);
+        let publicKey = await res.arrayBuffer();
         //subscribe to push service
         let subscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(publicKey)
+            applicationServerKey: publicKey
         });
         console.log(subscription.toJSON());
     } catch (e) {
@@ -123,20 +122,4 @@ async function triggerSync() {
     } catch (e) {
         console.warn(e.message);
     }
-}
-
-//from Mozilla's serviceworker-cookbook https://github.com/mozilla/serviceworker-cookbook
-function urlBase64ToUint8Array(base64String) {
-    var padding = '='.repeat((4 - base64String.length % 4) % 4);
-    var base64 = (base64String + padding)
-        .replace(/\-/g, '+')
-        .replace(/_/g, '/');
-
-    var rawData = window.atob(base64);
-    var outputArray = new Uint8Array(rawData.length);
-
-    for (var i = 0; i < rawData.length; ++i) {
-        outputArray[i] = rawData.charCodeAt(i);
-    }
-    return outputArray;
 }

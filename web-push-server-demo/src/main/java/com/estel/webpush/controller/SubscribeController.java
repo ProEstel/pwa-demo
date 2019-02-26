@@ -1,6 +1,5 @@
 package com.estel.webpush.controller;
 
-import nl.martijndwars.webpush.Base64Encoder;
 import nl.martijndwars.webpush.Notification;
 import nl.martijndwars.webpush.PushService;
 import nl.martijndwars.webpush.Subscription;
@@ -27,14 +26,14 @@ import static org.bouncycastle.jce.provider.BouncyCastleProvider.PROVIDER_NAME;
 @RequestMapping("/")
 public class SubscribeController {
 
-	private String publicKey = "";
-	private String privateKey = "";
+	private ECPublicKey publicKey = null;
+	private ECPrivateKey privateKey = null;
 
 	@RequestMapping("/getKey")
 	@ResponseBody
-	public String getKey(){
+	public byte[] getKey(){
 		generateKeys();
-		return this.publicKey;
+		return Utils.encode(this.publicKey);
 	}
 
 	@RequestMapping("/push")
@@ -45,8 +44,8 @@ public class SubscribeController {
 			PushService pushService = new PushService();
 //			pushService.setPublicKey(Utils.loadPublicKey("BGl4xCE-w3XVGeX5F2fSvNTTuyMT-cfPf9qYf1b8tJc9mO3Y2P9FcEH7JVzBlcolwJ2Vgg7JNwvfWyzsj-xBe90="));
 //			pushService.setPrivateKey(Utils.loadPrivateKey("V6pWDEb6vldP8TvSo25G2uco2A9AbP92-MakZdvbnFk="));
-			pushService.setPublicKey(Utils.loadPublicKey(this.publicKey));
-			pushService.setPrivateKey(Utils.loadPrivateKey(this.privateKey));
+			pushService.setPublicKey(this.publicKey);
+			pushService.setPrivateKey(this.privateKey);
 			//Thread.sleep(5000);
 			HttpResponse httpResponse = pushService.send(notification);
 
@@ -76,13 +75,8 @@ public class SubscribeController {
 			keyPairGenerator.initialize(parameterSpec);
 			KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
-			ECPublicKey publicKey = (ECPublicKey) keyPair.getPublic();
-			ECPrivateKey privateKey = (ECPrivateKey) keyPair.getPrivate();
-			byte[] encodedPublicKey = Utils.encode(publicKey);
-			byte[] encodedPrivateKey = Utils.encode(privateKey);
-
-			this.publicKey = Base64Encoder.encodeUrl(encodedPublicKey);
-			this.privateKey = Base64Encoder.encodeUrl(encodedPrivateKey);
+			this.publicKey = (ECPublicKey) keyPair.getPublic();
+			this.privateKey = (ECPrivateKey) keyPair.getPrivate();
 		} catch (Exception e){
 			e.printStackTrace();
 		}

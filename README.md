@@ -9,6 +9,4 @@ To run the demo, deploy `./pwa-demo` on any web server (HTTPS recommended). To t
 ## Credits
 > [archlinux-wallpaper](https://git.archlinux.org/svntogit/community.git/tree/trunk?h=packages/archlinux-wallpaper): Alexander Rødseth, Thayer Williams, Andrea 'BaSh' Scarpino  [CCPL:by-nc-sa](https://creativecommons.org/licenses/by-nc-sa/4.0/), [GPL](http://www.gnu.org/licenses/gpl.html)  
 
-> [serviceworker-cookbook](https://github.com/mozilla/serviceworker-cookbook): mozilla, slokhorst  [MIT LICENSE](https://github.com/mozilla/serviceworker-cookbook/blob/master/LICENSE)  
-
 > [webpush-java](https://github.com/web-push-libs/webpush-java): web-push-libs, MartijnDwars, fischermatte  [MIT LICENSE](https://github.com/web-push-libs/webpush-java/blob/master/LICENSE)  
