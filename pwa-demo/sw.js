@@ -5,6 +5,7 @@ const version = 'v1';
 const appShellList = [
     '/pwa-demo/',
     '/pwa-demo/index.html',
+    '/pwa-demo/images/placeholder.jpg',
     '/pwa-demo/images/web.png',
     '/pwa-demo/js/app.js',
     '/pwa-demo/js/data.js'

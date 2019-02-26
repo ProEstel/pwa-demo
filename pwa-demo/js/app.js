@@ -1,7 +1,7 @@
 //generate content template
 let content = '';
 imageData.forEach((name) => {
-    content += `<img src="${name}"/>`;
+    content += `<img src="/pwa-demo/images/placeholder.jpg" tmp="${name}"/>`;
 });
 document.querySelector('#content').innerHTML = content;
 
@@ -96,6 +96,20 @@ document.querySelector('#sync').addEventListener('click', triggerSync);
 
 window.addEventListener('beforeunload', triggerSync);
 
+//loadimages
+let imgNodes = document.querySelectorAll('img[tmp]');
+let observer = new IntersectionObserver((entries, observer)=>{
+    entries.forEach((entry)=>{
+        if (entry.isIntersecting) {
+            loadImages(entry.target);
+            observer.unobserve(entry.target);
+        }
+    });
+});
+imgNodes.forEach((img) => {
+    observer.observe(img);
+});
+
 async function triggerSync() {
     try {
         let registration = await navigator.serviceWorker.ready;
@@ -103,6 +117,13 @@ async function triggerSync() {
     } catch (e) {
         console.warn(e.message);
     }
+}
+
+function loadImages(img) {
+    img.setAttribute('src', img.getAttribute('tmp'));
+    img.onload = () => {
+        img.removeAttribute('tmp');
+    };
 }
 
 //from Mozilla's serviceworker-cookbook https://github.com/mozilla/serviceworker-cookbook.git
