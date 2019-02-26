@@ -63,7 +63,7 @@ document.querySelector('#push').addEventListener('click', async () => {
     try {
         let registration = await navigator.serviceWorker.ready;
         let subscription = await registration.pushManager.getSubscription();
-        //send subscription to push-server
+        //send push request to push-server
         let res = await fetch('/push-server/push', {
             method: 'POST',
             headers: {
@@ -95,26 +95,6 @@ document.querySelector('#sync').addEventListener('click', triggerSync);
 
 window.addEventListener('beforeunload', triggerSync);
 
-//loadimages
-let imgNodes = document.querySelectorAll('img[tmp]');
-let observer = new IntersectionObserver((entries, observer)=>{
-    entries.forEach((entry)=>{
-        if (entry.isIntersecting) {
-            loadImages(entry.target);
-            observer.unobserve(entry.target);
-        }
-    });
-});
-imgNodes.forEach((img) => {
-    observer.observe(img);
-});
-function loadImages(img) {
-    img.setAttribute('src', img.getAttribute('tmp'));
-    img.onload = () => {
-        img.removeAttribute('tmp');
-    };
-}
-
 async function triggerSync() {
     try {
         let registration = await navigator.serviceWorker.ready;
@@ -123,3 +103,22 @@ async function triggerSync() {
         console.warn(e.message);
     }
 }
+
+
+//loadimages
+let imgNodes = document.querySelectorAll('img[tmp]');
+let observer = new IntersectionObserver((entries, observer)=>{
+    entries.forEach((entry)=>{
+        if (entry.isIntersecting) {
+            let img = entry.target;
+            img.setAttribute('src', img.getAttribute('tmp'));
+            img.onload = () => {
+                img.removeAttribute('tmp');
+            };
+            observer.unobserve(img);
+        }
+    });
+});
+imgNodes.forEach((img) => {
+    observer.observe(img);
+});

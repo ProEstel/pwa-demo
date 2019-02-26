@@ -33,14 +33,14 @@ self.addEventListener('fetch', (e) => {
     e.respondWith(
         (async () => {
             let response = await caches.match(e.request);
-            return response || (async () => {
+            if (!response) {
                 //if no match then fetch and cache
-                let response = await fetch(e.request);
+                response = await fetch(e.request);
                 let cache = await caches.open(version);
                 await cache.put(e.request, response.clone());
                 console.log(`Service Worker cached missing resource: ${e.request.url}`);
-                return response;
-            })();
+            }
+            return response;
         })()
     );
 });
