@@ -1,7 +1,7 @@
 //generate content template
 let content = '';
 imageData.forEach((path) => {
-    content += `<img src="/pwa-demo/images/placeholder.jpg" tmp="${path}"/>`;
+    content += `<div class="img-container"><img src="/pwa-demo/images/placeholder.jpg" tmp="${path}"/></div>`;
 });
 document.querySelector('#content').innerHTML = content;
 
@@ -93,7 +93,7 @@ document.querySelector('#unsubscribe').addEventListener('click', async () => {
 //trigger sync: chrome only
 document.querySelector('#sync').addEventListener('click', triggerSync);
 
-window.addEventListener('beforeunload', triggerSync);
+//window.addEventListener('beforeunload', triggerSync);
 
 async function triggerSync() {
     try {
@@ -104,11 +104,30 @@ async function triggerSync() {
     }
 }
 
+//calc in Main Thread
+document.querySelector('#calcMain').addEventListener('click', () => {
+    console.time('main');
+    console.log('From Main: ' + calc());
+    console.timeEnd('main');
+});
+//calc in Service Worker
+document.querySelector('#calcWorker').addEventListener('click', () => {
+    console.time('worker');
+    //It's just a demo, if you really want to do heavy work, you should use an independent Worker.
+    navigator.serviceWorker.controller.postMessage('calc');
+});
+
+//message
+navigator.serviceWorker.addEventListener('message', (e) => {
+    if (e.origin === location.origin) {
+        console.log('From Worker: ' + e.data);
+        console.timeEnd('worker');
+    }
+})
 
 //loadimages
-let imgNodes = document.querySelectorAll('img[tmp]');
-let observer = new IntersectionObserver((entries, observer)=>{
-    entries.forEach((entry)=>{
+let observer = new IntersectionObserver((entries, observer) => {
+    entries.forEach((entry) => {
         if (entry.isIntersecting) {
             let img = entry.target;
             img.setAttribute('src', img.getAttribute('tmp'));
@@ -119,6 +138,7 @@ let observer = new IntersectionObserver((entries, observer)=>{
         }
     });
 });
+let imgNodes = document.querySelectorAll('img[tmp]');
 imgNodes.forEach((img) => {
     observer.observe(img);
 });

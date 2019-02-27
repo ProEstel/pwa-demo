@@ -92,3 +92,14 @@ self.addEventListener('sync', (e) => {
         console.log('Sync tag does not match, skipped.');
     }
 });
+
+//message
+self.addEventListener('message', async (e) => {
+    if (e.data === 'calc') {
+        let result = calc();
+        let clientList = await self.clients.matchAll();
+        clientList.forEach((client) => {
+            client.postMessage(result);
+        });
+    }
+});
