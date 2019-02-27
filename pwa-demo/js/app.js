@@ -93,7 +93,7 @@ document.querySelector('#unsubscribe').addEventListener('click', async () => {
 //trigger sync: chrome only
 document.querySelector('#sync').addEventListener('click', triggerSync);
 
-//window.addEventListener('beforeunload', triggerSync);
+window.addEventListener('beforeunload', triggerSync);
 
 async function triggerSync() {
     try {
@@ -111,7 +111,7 @@ document.querySelector('#calcMain').addEventListener('click', () => {
     console.timeEnd('main');
 });
 //calc in Service Worker
-document.querySelector('#calcWorker').addEventListener('click', () => {
+document.querySelector('#calcWorker').addEventListener('click', async () => {
     console.time('worker');
     //It's just a demo, if you really want to do heavy work, you should use an independent Worker.
     navigator.serviceWorker.controller.postMessage('calc');

@@ -8,7 +8,8 @@ const appShellList = [
     '/pwa-demo/images/placeholder.jpg',
     '/pwa-demo/images/web.png',
     '/pwa-demo/js/app.js',
-    '/pwa-demo/js/data.js'
+    '/pwa-demo/js/data.js',
+    '/pwa-demo/pwa-demo.webmanifest'
 ];
 
 let cacheList = imageData.concat(appShellList);
