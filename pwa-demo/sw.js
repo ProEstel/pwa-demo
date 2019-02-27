@@ -49,6 +49,8 @@ self.addEventListener('fetch', (e) => {
 //activate
 self.addEventListener('activate', (e) => {
     console.log('Service Worker activate triggered.');
+    //claim control of all clients
+    self.clients.claim();
     e.waitUntil(
         (async () => {
             let keyList = await caches.keys();
