@@ -111,7 +111,7 @@ document.querySelector('#calcMain').addEventListener('click', () => {
     console.timeEnd('main');
 });
 //calc in Service Worker
-document.querySelector('#calcWorker').addEventListener('click', async () => {
+document.querySelector('#calcWorker').addEventListener('click', () => {
     console.time('worker');
     //It's just a demo, if you really want to do heavy work, you should use an independent Worker.
     navigator.serviceWorker.controller.postMessage('calc');
