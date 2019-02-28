@@ -1,8 +1,8 @@
 //generate content template
 let content = '';
-imageData.forEach((path) => {
+for (let path of imageData) {
     content += `<div class="img-container"><img src="/pwa-demo/images/placeholder.jpg" tmp="${path}"/></div>`;
-});
+}
 document.querySelector('#content').innerHTML = content;
 
 //register a service worker
@@ -15,18 +15,18 @@ document.querySelector('#register').addEventListener('click', async () => {
 document.querySelector('#unregister').addEventListener('click', async () => {
     let registrations = await navigator.serviceWorker.getRegistrations();
     console.log('Unregistering all service worker...');
-    registrations.forEach((reg) => {
+    for (let reg of registrations) {
         reg.unregister();
-    });
+    }
 });
 
 //clear all caches
 document.querySelector('#clear').addEventListener('click', async () => {
     let keyList = await caches.keys();
     console.log('Clearing all caches...');
-    keyList.forEach((key) => {
+    for (let key of keyList) {
         caches.delete(key);
-    });
+    }
 });
 
 //generate notification
@@ -111,23 +111,32 @@ document.querySelector('#calcMain').addEventListener('click', () => {
     console.timeEnd('main');
 });
 //calc in Service Worker
-document.querySelector('#calcWorker').addEventListener('click', () => {
-    console.time('worker');
+document.querySelector('#calcServiceWorker').addEventListener('click', () => {
+    console.time('serviceworker');
     //It's just a demo, if you really want to do heavy work, you should use an independent Worker.
     navigator.serviceWorker.controller.postMessage('calc');
 });
-
-//message
+//message from service worker
 navigator.serviceWorker.addEventListener('message', (e) => {
     if (e.origin === location.origin) {
-        console.log('From Worker: ' + e.data);
-        console.timeEnd('worker');
+        console.log('From Service Worker: ' + e.data);
+        console.timeEnd('serviceworker');
     }
-})
+});
+//calc in Worker (recommended)
+let calcWorker = new Worker('js/worker.js');
+document.querySelector('#calcWorker').addEventListener('click', () => {
+    console.time('worker');
+    calcWorker.postMessage('calc');
+});
+calcWorker.addEventListener('message', (e) => {
+    console.log('From Worker: ' + e.data);
+    console.timeEnd('worker');
+});
 
 //loadimages
 let observer = new IntersectionObserver((entries, observer) => {
-    entries.forEach((entry) => {
+    for (let entry of entries) {
         if (entry.isIntersecting) {
             let img = entry.target;
             img.setAttribute('src', img.getAttribute('tmp'));
@@ -136,9 +145,9 @@ let observer = new IntersectionObserver((entries, observer) => {
             };
             observer.unobserve(img);
         }
-    });
+    }
 });
 let imgNodes = document.querySelectorAll('img[tmp]');
-imgNodes.forEach((img) => {
+for (let img of imgNodes) {
     observer.observe(img);
-});
+}

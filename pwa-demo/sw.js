@@ -29,21 +29,23 @@ self.addEventListener('install', (e) => {
 
 //fetch
 self.addEventListener('fetch', (e) => {
-    console.log('Service Worker fetching...');
-    //intercept request and return custom respond
-    e.respondWith(
-        (async () => {
-            let response = await caches.match(e.request);
-            if (!response) {
-                //if no match then fetch and cache
-                response = await fetch(e.request);
-                let cache = await caches.open(version);
-                await cache.put(e.request, response.clone());
-                console.log(`Service Worker cached missing resource: ${e.request.url}`);
-            }
-            return response;
-        })()
-    );
+    if (!e.request.url.includes('/push-server/')) {
+        console.log('Service Worker fetching...');
+        //intercept request and return custom respond
+        e.respondWith(
+            (async () => {
+                let response = await caches.match(e.request);
+                if (!response) {
+                    //if no match then fetch and cache
+                    response = await fetch(e.request);
+                    let cache = await caches.open(version);
+                    await cache.put(e.request, response.clone());
+                    console.log(`Service Worker cached missing resource: ${e.request.url}`);
+                }
+                return response;
+            })()
+        );
+    }
 });
 
 //activate
@@ -101,8 +103,8 @@ self.addEventListener('message', async (e) => {
     if (e.data === 'calc') {
         let result = calc();
         let clientList = await self.clients.matchAll();
-        clientList.forEach((client) => {
+        for (let client of clientList) {
             client.postMessage(result);
-        });
+        }
     }
 });
