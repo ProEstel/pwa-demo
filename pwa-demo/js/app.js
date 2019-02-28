@@ -18,23 +18,38 @@ document.querySelector('#unregister').addEventListener('click', async () => {
     for (let reg of registrations) {
         reg.unregister();
     }
+    clearCaches();
 });
 
 //clear all caches
-document.querySelector('#clear').addEventListener('click', async () => {
+document.querySelector('#clear').addEventListener('click', clearCaches);
+
+async function clearCaches() {
     let keyList = await caches.keys();
     console.log('Clearing all caches...');
     for (let key of keyList) {
         caches.delete(key);
     }
-});
+}
 
-//generate notification
+//generate notification by constructor
 document.querySelector('#notification').addEventListener('click', async () => {
     let result = await Notification.requestPermission();
     if (result === 'granted') {
         new Notification('Notification Demo', {
-            body: 'Hello, World!',
+            body: '"Hello, World!" from Notification constructor.',
+            icon: '/pwa-demo/images/web.png'
+        });
+    }
+});
+
+//generate notification by ServiceWorkerRegistration.showNotification()
+document.querySelector('#showNotification').addEventListener('click', async () => {
+    let result = await Notification.requestPermission();
+    if (result === 'granted') {
+        let registration = await navigator.serviceWorker.ready;
+        registration.showNotification('Notification Demo', {
+            body: '"Hello, World!" from ServiceWorkerRegistration.showNotification()',
             icon: '/pwa-demo/images/web.png'
         });
     }
@@ -42,20 +57,8 @@ document.querySelector('#notification').addEventListener('click', async () => {
 
 //subscribe to mozilla autopush
 document.querySelector('#subscribe').addEventListener('click', async () => {
-    try {
-        let registration = await navigator.serviceWorker.ready;
-        //get public key
-        let res = await fetch('/push-server/getKey');
-        let publicKey = await res.arrayBuffer();
-        //subscribe to push service
-        let subscription = await registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: publicKey
-        });
-        console.log(subscription.toJSON());
-    } catch (e) {
-        console.warn(e.message);
-    }
+    let registration = await navigator.serviceWorker.ready;
+    subscribe(registration);
 });
 
 //trigger push
@@ -71,12 +74,53 @@ document.querySelector('#push').addEventListener('click', async () => {
             },
             body: JSON.stringify(subscription.toJSON())
         });
-        let data = await res.text();
-        console.log(data);
+        if (res.ok) {
+            let data = await res.text();
+            console.log(`HTTP status code from push service: ${data}`);
+            if (data === '401') {
+                console.log('Push Service returned unauthorized, trying to fetch new key...');
+                //try subscribe again
+                await subscribe(registration);
+            }
+            if (!data.startsWith('20')) {
+                new Notification('Push Demo', {
+                    body: 'Error from push service, Please try again.'
+                });
+            }
+        } else {
+            console.warn(res.statusText);
+        }
+        
     } catch (e) {
         console.warn(e.message);
     }
 });
+
+async function subscribe(registration) {
+    try {
+        let subscription = await registration.pushManager.getSubscription();
+        if (!!subscription) {
+            console.log('Re-subscribing...');
+            //if exists a subscription, unsubscribe first
+            await subscription.unsubscribe();
+        }
+        //get public key
+        let res = await fetch('/push-server/getKey');
+        if (res.ok) {
+            let publicKey = await res.arrayBuffer();
+            //subscribe to push service
+            subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: publicKey
+            });
+            console.log(subscription.toJSON());
+        } else {
+            console.warn(res.statusText);
+        }
+    } catch (e) {
+        console.warn(e.message);
+    }
+}
 
 //unsubscribe
 document.querySelector('#unsubscribe').addEventListener('click', async () => {

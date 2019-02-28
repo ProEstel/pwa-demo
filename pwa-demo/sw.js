@@ -9,10 +9,14 @@ const appShellList = [
     '/pwa-demo/images/web.png',
     '/pwa-demo/js/app.js',
     '/pwa-demo/js/data.js',
+    '/pwa-demo/js/worker.js',
     '/pwa-demo/pwa-demo.webmanifest'
 ];
 
 let cacheList = imageData.concat(appShellList);
+
+//skip waiting to force activate
+//self.skipWaiting();
 
 //install
 self.addEventListener('install', (e) => {
@@ -51,10 +55,10 @@ self.addEventListener('fetch', (e) => {
 //activate
 self.addEventListener('activate', (e) => {
     console.log('Service Worker activate triggered.');
-    //claim control of all clients
-    self.clients.claim();
     e.waitUntil(
         (async () => {
+            //claim control of all clients
+            await self.clients.claim();
             let keyList = await caches.keys();
             return Promise.all(
                 keyList.map(async (key) => {
@@ -65,9 +69,18 @@ self.addEventListener('activate', (e) => {
                         return result;
                     }
                 })
-            )
+            );
         })()
     )
+});
+
+//notificationclick
+self.addEventListener('notificationclick', (e) => {
+    console.log(`Notification "${e.notification.title}" clicked.`);
+});
+//notificationclose
+self.addEventListener('notificationclose', (e) => {
+    console.log(`Notification "${e.notification.title}" closed.`);
 });
 
 //push
@@ -79,6 +92,28 @@ self.addEventListener('push', (e) => {
         })
     );
 });
+
+//pushsubscriptionchange
+self.addEventListener('pushsubscriptionchange', (e) => {
+    console.log('Push Subscription Changed.');
+    e.waitUntil(
+        (async () => {
+            try {
+                //get public key
+                let res = await fetch('/push-server/getKey');
+                let publicKey = await res.arrayBuffer();
+                //subscribe to push service
+                let subscription = await self.registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: publicKey
+                });
+                console.log(subscription.toJSON());
+            } catch (e) {
+                console.warn(e.message);
+            }
+        })()
+    );
+})
 
 //sync
 self.addEventListener('sync', (e) => {
@@ -101,10 +136,14 @@ self.addEventListener('sync', (e) => {
 //message
 self.addEventListener('message', async (e) => {
     if (e.data === 'calc') {
-        let result = calc();
-        let clientList = await self.clients.matchAll();
-        for (let client of clientList) {
-            client.postMessage(result);
-        }
+        e.waitUntil(
+            (async () => {
+                let result = calc();
+                let clientList = await self.clients.matchAll();
+                for (let client of clientList) {
+                    client.postMessage(result);
+                }
+            })()
+        );
     }
 });
