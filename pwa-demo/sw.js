@@ -13,9 +13,6 @@ const appShellList = [
     '/pwa-demo/pwa-demo.webmanifest'
 ];
 
-//skip waiting to force activate
-//self.skipWaiting();
-
 //install
 self.addEventListener('install', (e) => {
     console.log('Service Worker installing...');
@@ -26,6 +23,8 @@ self.addEventListener('install', (e) => {
             return cache.addAll(appShellList);
         })
     );
+    //skip waiting to force activate
+    //self.skipWaiting();
     console.log('Service Worker cached app shell.');
 });
 
@@ -39,10 +38,14 @@ self.addEventListener('fetch', (e) => {
                 let response = await caches.match(e.request);
                 if (!response) {
                     //if no match then fetch and cache
-                    response = await fetch(e.request);
-                    let cache = await caches.open(version);
-                    await cache.put(e.request, response.clone());
-                    console.log(`Service Worker cached missing resource: ${e.request.url}`);
+                    response = await fetch(e.request, {
+                        cache: "reload"
+                    });
+                    if (response.ok) {
+                        let cache = await caches.open(version);
+                        await cache.put(e.request, response.clone());
+                        console.log(`Service Worker cached missing resource: ${e.request.url}`);
+                    }
                 }
                 return response;
             })()
