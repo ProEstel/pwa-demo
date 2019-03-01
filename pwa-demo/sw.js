@@ -1,5 +1,5 @@
 //ServiceWorkerGlobalScope.self
-self.importScripts('js/data.js');
+self.importScripts('js/global.js');
 
 const version = 'v1';
 const appShellList = [
@@ -8,12 +8,10 @@ const appShellList = [
     '/pwa-demo/images/placeholder.jpg',
     '/pwa-demo/images/web.png',
     '/pwa-demo/js/app.js',
-    '/pwa-demo/js/data.js',
+    '/pwa-demo/js/global.js',
     '/pwa-demo/js/worker.js',
     '/pwa-demo/pwa-demo.webmanifest'
 ];
-
-let cacheList = imageData.concat(appShellList);
 
 //skip waiting to force activate
 //self.skipWaiting();
@@ -25,10 +23,10 @@ self.addEventListener('install', (e) => {
     e.waitUntil(
         //caches is a CacheStorage object of ServiceWorkerGlobalScope
         caches.open(version).then((cache) => {
-            return cache.addAll(cacheList);
+            return cache.addAll(appShellList);
         })
     );
-    console.log('Service Worker cached all.');
+    console.log('Service Worker cached app shell.');
 });
 
 //fetch
