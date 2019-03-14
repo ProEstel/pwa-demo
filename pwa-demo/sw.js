@@ -135,16 +135,15 @@ self.addEventListener('sync', (e) => {
 });
 
 //message
-self.addEventListener('message', async (e) => {
-    if (e.data === 'calc') {
-        e.waitUntil(
-            (async () => {
-                let result = calc();
-                let clientList = await self.clients.matchAll();
-                for (let client of clientList) {
-                    client.postMessage(result);
-                }
-            })()
-        );
+self.addEventListener('message', e => {
+    if (hiText === e.data) { //message via MessageChannel
+        e.ports[0].postMessage('hi from sw');
+    } else if (helloText === e.data) { //message directly
+        e.source.postMessage('hello to source'); //message to source
+        self.clients.matchAll().then((clientList) => {
+            for (let client of clientList) {
+                client.postMessage('hello from sw'); //broadcast
+            }
+        });
     }
 });

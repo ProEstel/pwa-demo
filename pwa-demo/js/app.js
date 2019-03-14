@@ -165,26 +165,32 @@ async function triggerSync() {
     }
 }
 
+//postMessage (Normal)
+document.querySelector('#postMessage').addEventListener('click', () => {
+    navigator.serviceWorker.controller.postMessage(helloText);
+});
+//message from service worker
+navigator.serviceWorker.addEventListener('message', e => {
+    console.log(`Message from ServiceWorker: ${e.data}`);
+});
+
+//postMessage (MessageChannel)
+document.querySelector('#messageChannel').addEventListener('click', () => {
+    let messageChannel = new MessageChannel();
+    //message from port2
+    messageChannel.port1.onmessage = e => {
+        console.log(`Message from MessageChannel: ${e.data}`);
+    }
+    navigator.serviceWorker.controller.postMessage(hiText, [messageChannel.port2]);
+});
+
 //calc in Main Thread
 document.querySelector('#calcMain').addEventListener('click', () => {
     console.time('main');
     console.log('From Main: ' + calc());
     console.timeEnd('main');
 });
-//calc in Service Worker
-document.querySelector('#calcServiceWorker').addEventListener('click', () => {
-    console.time('serviceworker');
-    //It's just a demo, if you really want to do heavy work, you should use an independent Worker.
-    navigator.serviceWorker.controller.postMessage('calc');
-});
-//message from service worker
-navigator.serviceWorker.addEventListener('message', (e) => {
-    if (e.origin === location.origin) {
-        console.log('From Service Worker: ' + e.data);
-        console.timeEnd('serviceworker');
-    }
-});
-//calc in Worker (recommended)
+//calc in Worker
 let calcWorker = new Worker('js/worker.js');
 document.querySelector('#calcWorker').addEventListener('click', () => {
     console.time('worker');
